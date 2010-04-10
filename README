@@ -1,0 +1,21 @@
+A library for processing Xilinx XSVF files.
+
+The project build assumes a directory structure like this:
+
+src
+|
++-apps
+|
++-libs
+| |
+| +-libxsvf
+|
++-3rd
+
+*** BUILDING ON WINDOWS ***
+
+make -f Makefile.win32
+
+*** BUILDING ON LINUX ***
+
+make -f Makefile.linux
