@@ -16,16 +16,14 @@
  */
 #include "parse.h"
 
-#define MAX_LEN 128
-
 static Command m_state;
-static unsigned char m_cmdParamCount;  // sometimes bit count, sometimes byte count
-static unsigned short m_sdrSize;       // should be 32 bits, but that would be silly
-static unsigned short m_index;
-static unsigned char m_tdoMask[MAX_LEN];
+static uint8 m_cmdParamCount;  // sometimes bit count, sometimes byte count
+static uint16 m_sdrSize;       // should be 32 bits, but that would be silly
+static uint16 m_index;
+static uint8 m_tdoMask[MAX_LEN];
 static union {
-	unsigned char bitmap[2 * MAX_LEN];
-	unsigned int runTest;
+	uint8 bitmap[2 * MAX_LEN];
+	uint32 runTest;
 } m_u;
 
 void parseInit(void) {
@@ -34,16 +32,15 @@ void parseInit(void) {
 	m_sdrSize = 0x0000;
 }
 
-ParseStatus parse(const unsigned char *data, unsigned char bufBytesRemaining
+ParseStatus parse(const uint8 *data, uint8 bufBytesRemaining
 	#ifdef PARSE_HAVE_CALLBACKS
 		, const ParseCallbacks *callbacks
 	#endif
 ) {
-	unsigned char byte;
+	uint8 byte;
 	ParseStatus returnCode;
 	while ( bufBytesRemaining ) {
 		byte = *data++;
-		bufBytesRemaining--;
 		switch ( m_state ) {
 			case XIDLE:
 				m_state = byte;
@@ -177,6 +174,9 @@ ParseStatus parse(const unsigned char *data, unsigned char bufBytesRemaining
 							callbacks->
 						#endif
 						gotXSDRTDO(m_sdrSize, m_u.bitmap, m_tdoMask);
+					if ( returnCode != PARSE_SUCCESS ) {
+						return returnCode;
+					}
 					m_state = XIDLE;
 				}
 				break;
@@ -194,6 +194,7 @@ ParseStatus parse(const unsigned char *data, unsigned char bufBytesRemaining
 			default:
 				return PARSE_ILLEGAL_COMMAND;
 		}
+		bufBytesRemaining--;
 	}
 	return PARSE_SUCCESS;
 }

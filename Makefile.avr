@@ -30,7 +30,7 @@ CFLAGS = \
 	-fpack-struct -fshort-enums -finline-limit=20 -Wall -Wstrict-prototypes \
 	-Wundef -std=gnu99 -Wall -pedantic-errors
 
-all: $(TARGET)
+all: ../../include $(TARGET)
 
 $(TARGET): $(CC_OBJS)
 	mkdir -p lib/$(PLATFORM)
@@ -38,6 +38,8 @@ $(TARGET): $(CC_OBJS)
 
 $(OBJDIR)/$(PLATFORM)/%.o : %.c
 	$(CC) -c $(CFLAGS) -MMD -MP -MF $(DEPDIR)/$(PLATFORM)/$(@F).d -Wa,-adhlns=$(OBJDIR)/$(PLATFORM)/$<.lst $< -o $@ -DF_CPU=$(F_CPU)
+
+-include Makefile.common
 
 clean: FORCE
 	rm -rf $(OBJDIR) $(DEPDIR) lib

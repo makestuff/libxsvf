@@ -19,8 +19,10 @@ UTPP_HOME = ../../3rd/UnitTest++
 UNZIP_VERSION = 600
 UNZIP_HOME = ../../3rd/unz$(UNZIP_VERSION)
 
-all: $(UNZIP_HOME) $(UTPP_HOME)/Release/UnitTest++.vsnet2005.lib
+all: $(UNZIP_HOME) $(UTPP_HOME)/Release/UnitTest++.vsnet2005.lib ../../include
 	vcbuild /nologo libxsvf.sln
+
+-include Makefile.common
 
 $(UNZIP_HOME):
 	wget ftp://ftp.info-zip.org/pub/infozip/win32/unz$(UNZIP_VERSION)xn.exe

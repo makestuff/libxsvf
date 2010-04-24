@@ -19,8 +19,14 @@
 //#include "../../dump/dump.h"
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 using namespace std;
+
+extern "C" {
+	unsigned long magic0;
+	unsigned long magic1;
+}
 
 static const unsigned char *m_tdoMask;
 static unsigned short m_sdrSize;
@@ -50,7 +56,7 @@ ParseStatus gotXTDOMASK(unsigned short maskNumBits, const unsigned char *maskBit
 	}
 	return PARSE_SUCCESS;
 }
-ParseStatus gotXRUNTEST(unsigned int runTest) {
+ParseStatus gotXRUNTEST(unsigned long runTest) {
 	m_reconstruction.push_back(XRUNTEST);
 	m_reconstruction.push_back((runTest >> 24) & 0x000000FF);
 	m_reconstruction.push_back((runTest >> 16) & 0x000000FF);
@@ -83,7 +89,15 @@ ParseStatus gotXSDRTDO(unsigned short tdoNumBits, const unsigned char *tdoBitmap
 ParseStatus gotXSTATE(TAPState tapState) {
 	m_reconstruction.push_back(XSTATE);
 	m_reconstruction.push_back(tapState);
-	return PARSE_SUCCESS;
+	cout << "tapState=" << tapState << endl;
+	if ( tapState == TAPSTATE_TEST_LOGIC_RESET
+		 || tapState == TAPSTATE_RUN_TEST_IDLE 
+		 || tapState == TAPSTATE_SELECT_IR )
+	{
+		return PARSE_SUCCESS;
+	} else {
+		return PARSE_CALLBACK_ERROR;
+	}
 }
 #ifdef PARSE_HAVE_CALLBACKS
 const ParseCallbacks m_callbacks = {
@@ -119,23 +133,23 @@ TEST(Parse_testBitsToBytes) {
 	CHECK_EQUAL(3, bitsToBytes(17));
 }
 
-static void checkRoundTrip(const unsigned char *const arr, const unsigned int size) {
+static void checkRoundTrip(const unsigned char *const arr, const unsigned long size) {
 	ParseStatus status;
-	unsigned int bytesRemaining = size;
+	unsigned long bytesRemaining = size;
 	const unsigned char *p = arr;
 	init();
-	while ( bytesRemaining >= 128 ) {
-		status = parse(p, 128
+	while ( bytesRemaining >= 64 ) {
+		status = parse(p, 64
 			#ifdef PARSE_HAVE_CALLBACKS
 				, &m_callbacks
 			#endif
 		);
 		CHECK_EQUAL(PARSE_SUCCESS, status);
-		bytesRemaining -= 128;
-		p += 128;
+		bytesRemaining -= 64;
+		p += 64;
 	}
 	if ( bytesRemaining ) {
-		status = parse(p, bytesRemaining
+		status = parse(p, (unsigned char)bytesRemaining
 			#ifdef PARSE_HAVE_CALLBACKS
 				, &m_callbacks
 			#endif
@@ -180,9 +194,9 @@ TEST(Parse_testXREPEAT) {
 }
 
 TEST(Parse_testXSDRSIZE) {
-	unsigned char arr1[] = {XSDRSIZE, 0x00, 0x00, 0x04, 0x00, XCOMPLETE};  // 1024 bits
+	unsigned char arr1[] = {XSDRSIZE, 0x00, 0x00, MAX_LEN/32, 0x00, XCOMPLETE};  // should just pass
 	unsigned char arr2[] = {XSDRSIZE, 0x87, 0x65, 0x43, 0x21, XCOMPLETE};  // silly number
-	unsigned char arr3[] = {XSDRSIZE, 0x00, 0x00, 0x04, 0x01, XCOMPLETE};  // 1025 bits
+	unsigned char arr3[] = {XSDRSIZE, 0x00, 0x00, MAX_LEN/32, 0x01, XCOMPLETE};  // should just fail
 	ParseStatus status;
 	checkRoundTrip(arr1, sizeof(arr1));
 	init();
@@ -234,7 +248,7 @@ TEST(Parse_testProgFile) {
 	int length;
 	char *buffer;
 	ifstream is;
-	is.open("fred.xsvf", ios::binary);
+	is.open("test.xsvf", ios::binary);
 	CHECK_EQUAL(false, is.fail());
 
 	// get length of file:
@@ -254,10 +268,10 @@ TEST(Parse_testProgFile) {
 	delete[] buffer;
 }
 
-static void checkError(const unsigned char *arr, unsigned int count, ParseStatus expectedStatus) {
+static void checkError(const unsigned char *arr, unsigned long count, ParseStatus expectedStatus) {
 	ParseStatus status;
 	init();
-	status = parse(arr, count
+	status = parse(arr, (unsigned char)count
 		#ifdef PARSE_HAVE_CALLBACKS
 			, &m_callbacks
 		#endif

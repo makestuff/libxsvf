@@ -17,10 +17,13 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+#include "types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
+	#define MAX_LEN 32
 	//#define PARSE_HAVE_CALLBACKS
 	#define bitsToBytes(x) ((x>>3) + (x&7 ? 1 : 0))
 
@@ -29,7 +32,8 @@ extern "C" {
 		PARSE_ILLEGAL_COMMAND,
 		PARSE_ILLEGAL_XSIR,
 		PARSE_ILLEGAL_XSDRSIZE,
-		PARSE_MISSING_XSDRSIZE
+		PARSE_MISSING_XSDRSIZE,
+		PARSE_CALLBACK_ERROR
 	} ParseStatus;
 	
 	const char *parseStrError(void);
@@ -85,25 +89,25 @@ extern "C" {
 	#ifdef PARSE_HAVE_CALLBACKS
 		typedef struct {
 			ParseStatus (*gotXCOMPLETE)(void);
-			ParseStatus (*gotXTDOMASK)(unsigned short, const unsigned char *);
-			ParseStatus (*gotXSIR)(unsigned char, const unsigned char *);
-			ParseStatus (*gotXRUNTEST)(unsigned int);
-			ParseStatus (*gotXREPEAT)(unsigned char);
-			ParseStatus (*gotXSDRSIZE)(unsigned short);
-			ParseStatus (*gotXSDRTDO)(unsigned short, const unsigned char *, const unsigned char *);
+			ParseStatus (*gotXTDOMASK)(uint16, const uint8 *);
+			ParseStatus (*gotXSIR)(uint8, const uint8 *);
+			ParseStatus (*gotXRUNTEST)(uint32);
+			ParseStatus (*gotXREPEAT)(uint8);
+			ParseStatus (*gotXSDRSIZE)(uint16);
+			ParseStatus (*gotXSDRTDO)(uint16, const uint8 *, const uint8 *);
 			ParseStatus (*gotXSTATE)(TAPState);
 		} ParseCallbacks;
-		ParseStatus parse(const unsigned char *data, unsigned char length, const ParseCallbacks *callbacks);
+		ParseStatus parse(const uint8 *data, uint8 length, const ParseCallbacks *callbacks);
 	#else
 		ParseStatus gotXCOMPLETE(void);
-		ParseStatus gotXTDOMASK(unsigned short, const unsigned char *);
-		ParseStatus gotXSIR(unsigned char, const unsigned char *);
-		ParseStatus gotXRUNTEST(unsigned int);
-		ParseStatus gotXREPEAT(unsigned char);
-		ParseStatus gotXSDRSIZE(unsigned short);
-		ParseStatus gotXSDRTDO(unsigned short, const unsigned char *, const unsigned char *);
+		ParseStatus gotXTDOMASK(uint16, const uint8 *);
+		ParseStatus gotXSIR(uint8, const uint8 *);
+		ParseStatus gotXRUNTEST(uint32);
+		ParseStatus gotXREPEAT(uint8);
+		ParseStatus gotXSDRSIZE(uint16);
+		ParseStatus gotXSDRTDO(uint16, const uint8 *, const uint8 *);
 		ParseStatus gotXSTATE(TAPState);
-		ParseStatus parse(const unsigned char *data, unsigned char length);
+		ParseStatus parse(const uint8 *data, uint8 length);
 	#endif
 	void parseInit(void);
 
