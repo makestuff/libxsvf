@@ -32,7 +32,7 @@ $(UNZIP_HOME):
 	rm -rf unz$(UNZIP_VERSION)xn.exe
 
 $(UTPP_HOME)/Release/UnitTest++.vsnet2005.lib: $(UTPP_HOME)
-	vcbuild /nologo /upgrade ..\..\3rd\UnitTest++\UnitTest++.vsnet2005.sln
+	vcbuild /nologo /upgrade ..\\..\\3rd\\UnitTest++\\UnitTest++.vsnet2005.sln
 
 $(UTPP_HOME):
 	wget http://sourceforge.net/projects/unittest-cpp/files/UnitTest++/$(UTPP_VERSION)/unittest-cpp-$(UTPP_VERSION).zip/download
