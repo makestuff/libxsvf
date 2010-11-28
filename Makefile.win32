@@ -25,7 +25,7 @@ all: $(UNZIP_HOME) $(UTPP_HOME)/Release/UnitTest++.vsnet2005.lib ../../include
 -include Makefile.common
 
 $(UNZIP_HOME):
-	wget ftp://ftp.info-zip.org/pub/infozip/win32/unz$(UNZIP_VERSION)xn.exe
+	wget --no-check-certificate ftp://ftp.info-zip.org/pub/infozip/win32/unz$(UNZIP_VERSION)xn.exe
 	mkdir unz$(UNZIP_VERSION); cd unz$(UNZIP_VERSION); ../unz$(UNZIP_VERSION)xn.exe
 	mkdir -p ../../3rd
 	mv unz$(UNZIP_VERSION) ../../3rd/
@@ -35,7 +35,7 @@ $(UTPP_HOME)/Release/UnitTest++.vsnet2005.lib: $(UTPP_HOME)
 	vcbuild /nologo /upgrade ..\\..\\3rd\\UnitTest++\\UnitTest++.vsnet2005.sln
 
 $(UTPP_HOME):
-	wget http://sourceforge.net/projects/unittest-cpp/files/UnitTest++/$(UTPP_VERSION)/unittest-cpp-$(UTPP_VERSION).zip/download
+	wget --no-check-certificate http://sourceforge.net/projects/unittest-cpp/files/UnitTest++/$(UTPP_VERSION)/unittest-cpp-$(UTPP_VERSION).zip/download
 	$(UNZIP_HOME)/unzip.exe unittest-cpp-$(UTPP_VERSION).zip
 	mkdir -p ../../3rd
 	mv UnitTest++ ../../3rd/
