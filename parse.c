@@ -50,9 +50,14 @@ ParseStatus parse(const uint8 *data, uint8 bufBytesRemaining
 					case XSIR:     // XSIR(uint8, ...)
 					case XREPEAT:  // XREPEAT(uint8)
 					case XSTATE:   // XSTATE(uint8)
+					case XENDIR:   // XENDIR(uint8)
+					case XENDDR:   // XENDDR(uint8)
 						break;
 					case XSDRTDO:  // XSDRTDO(..., ...)
 					case XTDOMASK: // XTDOMASK(...)
+					case XSDRB:    // XSDRB(...)
+					case XSDRC:    // XSDRC(...)
+					case XSDRE:    // XSDRC(...)
 						if ( !m_sdrSize ) {
 							return PARSE_MISSING_XSDRSIZE;
 						}
@@ -180,12 +185,73 @@ ParseStatus parse(const uint8 *data, uint8 bufBytesRemaining
 					m_state = XIDLE;
 				}
 				break;
+			case XSDRB:
+				m_u.bitmap[m_index++] = byte;
+				if ( m_index == bitsToBytes(m_sdrSize) ) {
+					returnCode =
+						#ifdef PARSE_HAVE_CALLBACKS
+							callbacks->
+						#endif
+						gotXSDRB(m_sdrSize, m_u.bitmap);
+					m_state = XIDLE;
+				}
+				break;
+			case XSDRC:
+				m_u.bitmap[m_index++] = byte;
+				if ( m_index == bitsToBytes(m_sdrSize) ) {
+					returnCode =
+						#ifdef PARSE_HAVE_CALLBACKS
+							callbacks->
+						#endif
+						gotXSDRC(m_sdrSize, m_u.bitmap);
+					m_state = XIDLE;
+				}
+				break;
+			case XSDRE:
+				m_u.bitmap[m_index++] = byte;
+				if ( m_index == bitsToBytes(m_sdrSize) ) {
+					returnCode =
+						#ifdef PARSE_HAVE_CALLBACKS
+							callbacks->
+						#endif
+						gotXSDRE(m_sdrSize, m_u.bitmap);
+					m_state = XIDLE;
+				}
+				break;
 			case XSTATE:
 				returnCode =
 					#ifdef PARSE_HAVE_CALLBACKS
 						callbacks->
 					#endif
 					gotXSTATE(byte);
+				if ( returnCode != PARSE_SUCCESS ) {
+					return returnCode;
+				}
+				m_state = XIDLE;
+				break;
+			case XENDIR:
+				if ( byte != 0x00 && byte != 0x01 ) {
+					return PARSE_ILLEGAL_XENDIR;
+				}
+				returnCode =
+					#ifdef PARSE_HAVE_CALLBACKS
+						callbacks->
+					#endif
+					gotXENDIR(byte);
+				if ( returnCode != PARSE_SUCCESS ) {
+					return returnCode;
+				}
+				m_state = XIDLE;
+				break;
+			case XENDDR:
+				if ( byte != 0x00 && byte != 0x01 ) {
+					return PARSE_ILLEGAL_XENDDR;
+				}
+				returnCode =
+					#ifdef PARSE_HAVE_CALLBACKS
+						callbacks->
+					#endif
+					gotXENDDR(byte);
 				if ( returnCode != PARSE_SUCCESS ) {
 					return returnCode;
 				}

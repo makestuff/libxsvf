@@ -79,6 +79,27 @@ ParseStatus gotXSDRTDO(uint16 tdoNumBits, const uint8 *tdoBitmap, const uint8 *t
 	CHECK_ARRAY_EQUAL(m_tdoMask, tdoMask, tdoNumBits);
 	return PARSE_SUCCESS;
 }
+ParseStatus gotXSDRB(uint16 tdoNumBits, const uint8 *tdoBitmap) {
+	m_reconstruction.push_back(XSDRB);
+	for ( int i = 0; i < bitsToBytes(tdoNumBits); i++ ) {
+		m_reconstruction.push_back(*tdoBitmap++);
+	}
+	return PARSE_SUCCESS;
+}
+ParseStatus gotXSDRC(uint16 tdoNumBits, const uint8 *tdoBitmap) {
+	m_reconstruction.push_back(XSDRC);
+	for ( int i = 0; i < bitsToBytes(tdoNumBits); i++ ) {
+		m_reconstruction.push_back(*tdoBitmap++);
+	}
+	return PARSE_SUCCESS;
+}
+ParseStatus gotXSDRE(uint16 tdoNumBits, const uint8 *tdoBitmap) {
+	m_reconstruction.push_back(XSDRE);
+	for ( int i = 0; i < bitsToBytes(tdoNumBits); i++ ) {
+		m_reconstruction.push_back(*tdoBitmap++);
+	}
+	return PARSE_SUCCESS;
+}
 ParseStatus gotXSTATE(TAPState tapState) {
 	m_reconstruction.push_back(XSTATE);
 	m_reconstruction.push_back(tapState);
@@ -90,6 +111,16 @@ ParseStatus gotXSTATE(TAPState tapState) {
 	} else {
 		return PARSE_CALLBACK_ERROR;
 	}
+}
+ParseStatus gotXENDIR(uint8 endState) {
+	m_reconstruction.push_back(XENDIR);
+	m_reconstruction.push_back(endState);
+	return PARSE_SUCCESS;
+}
+ParseStatus gotXENDDR(uint8 endState) {
+	m_reconstruction.push_back(XENDDR);
+	m_reconstruction.push_back(endState);
+	return PARSE_SUCCESS;
 }
 #ifdef PARSE_HAVE_CALLBACKS
 const ParseCallbacks m_callbacks = {
@@ -103,27 +134,6 @@ const ParseCallbacks m_callbacks = {
 	gotXSTATE
 };
 #endif
-
-TEST(Parse_testBitsToBytes) {
-	CHECK_EQUAL(0, bitsToBytes(0));
-	CHECK_EQUAL(1, bitsToBytes(1));
-	CHECK_EQUAL(1, bitsToBytes(2));
-	CHECK_EQUAL(1, bitsToBytes(3));
-	CHECK_EQUAL(1, bitsToBytes(4));
-	CHECK_EQUAL(1, bitsToBytes(5));
-	CHECK_EQUAL(1, bitsToBytes(6));
-	CHECK_EQUAL(1, bitsToBytes(7));
-	CHECK_EQUAL(1, bitsToBytes(8));
-	CHECK_EQUAL(2, bitsToBytes(9));
-	CHECK_EQUAL(2, bitsToBytes(10));
-	CHECK_EQUAL(2, bitsToBytes(11));
-	CHECK_EQUAL(2, bitsToBytes(12));
-	CHECK_EQUAL(2, bitsToBytes(13));
-	CHECK_EQUAL(2, bitsToBytes(14));
-	CHECK_EQUAL(2, bitsToBytes(15));
-	CHECK_EQUAL(2, bitsToBytes(16));
-	CHECK_EQUAL(3, bitsToBytes(17));
-}
 
 static void checkRoundTrip(const uint8 *const arr, const uint32 size) {
 	ParseStatus status;
@@ -150,6 +160,27 @@ static void checkRoundTrip(const uint8 *const arr, const uint32 size) {
 	}
 	CHECK_EQUAL(size, m_reconstruction.size());
 	CHECK_ARRAY_EQUAL(arr, m_reconstruction.begin(), size);
+}
+
+TEST(Parse_testBitsToBytes) {
+	CHECK_EQUAL(0, bitsToBytes(0));
+	CHECK_EQUAL(1, bitsToBytes(1));
+	CHECK_EQUAL(1, bitsToBytes(2));
+	CHECK_EQUAL(1, bitsToBytes(3));
+	CHECK_EQUAL(1, bitsToBytes(4));
+	CHECK_EQUAL(1, bitsToBytes(5));
+	CHECK_EQUAL(1, bitsToBytes(6));
+	CHECK_EQUAL(1, bitsToBytes(7));
+	CHECK_EQUAL(1, bitsToBytes(8));
+	CHECK_EQUAL(2, bitsToBytes(9));
+	CHECK_EQUAL(2, bitsToBytes(10));
+	CHECK_EQUAL(2, bitsToBytes(11));
+	CHECK_EQUAL(2, bitsToBytes(12));
+	CHECK_EQUAL(2, bitsToBytes(13));
+	CHECK_EQUAL(2, bitsToBytes(14));
+	CHECK_EQUAL(2, bitsToBytes(15));
+	CHECK_EQUAL(2, bitsToBytes(16));
+	CHECK_EQUAL(3, bitsToBytes(17));
 }
 
 TEST(Parse_testXCOMPLETE) {
@@ -207,6 +238,22 @@ TEST(Parse_testXSDRSIZE) {
 	CHECK_EQUAL(PARSE_ILLEGAL_XSDRSIZE, status);
 }
 
+TEST(Parse_testXENDIR) {
+	uint8 arr1[] = {XENDIR, 0x00, XCOMPLETE};  // should pass
+	uint8 arr2[] = {XENDIR, 0x01, XCOMPLETE};  // should pass
+	uint8 arr3[] = {XENDIR, 0x21, XCOMPLETE};  // should fail
+	ParseStatus status;
+	checkRoundTrip(arr1, sizeof(arr1));
+	checkRoundTrip(arr2, sizeof(arr2));
+	init();
+	status = parse(arr3, sizeof(arr3)
+		#ifdef PARSE_HAVE_CALLBACKS
+			, &m_callbacks
+		#endif
+	);
+	CHECK_EQUAL(PARSE_ILLEGAL_XENDIR, status);
+}
+
 TEST(Parse_testXSDRTDO) {
 	uint8 arr1[] = {XSDRSIZE, 0x00, 0x00, 0x00, 0x08, XTDOMASK, 0xAA, XSDRTDO, 0x99, 0xAA, XCOMPLETE};
 	uint8 arr2[] = {XSDRSIZE, 0x00, 0x00, 0x00, 0x09, XTDOMASK, 0xAA, 0x55, XSDRTDO, 0x99, 0xAA, 0xBB, 0xCC, XCOMPLETE};
@@ -216,6 +263,21 @@ TEST(Parse_testXSDRTDO) {
 	checkRoundTrip(arr2, sizeof(arr2));
 	checkRoundTrip(arr3, sizeof(arr3));
 	checkRoundTrip(arr4, sizeof(arr4));
+}
+
+TEST(Parse_testXSDRB) {
+	uint8 arr1[] = {XSDRSIZE, 0x00, 0x00, 0x00, 0x08, XSDRB, 0x99, XCOMPLETE};
+	checkRoundTrip(arr1, sizeof(arr1));
+}
+
+TEST(Parse_testXSDRC) {
+	uint8 arr1[] = {XSDRSIZE, 0x00, 0x00, 0x00, 0x08, XSDRC, 0x99, XCOMPLETE};
+	checkRoundTrip(arr1, sizeof(arr1));
+}
+
+TEST(Parse_testXSDRE) {
+	uint8 arr1[] = {XSDRSIZE, 0x00, 0x00, 0x00, 0x08, XSDRE, 0x99, XCOMPLETE};
+	checkRoundTrip(arr1, sizeof(arr1));
 }
 
 TEST(Parse_testXSTATE) {
@@ -236,11 +298,10 @@ TEST(Parse_testIDCODE) {
 	//dump(0x00000000, &m_reconstruction.at(0), m_reconstruction.size());
 }
 
-TEST(Parse_testProgFile) {
-	int length;
+const uint8 *readFile(const char *file, int &length) {
 	char *buffer;
 	ifstream is;
-	is.open("test.xsvf", ios::binary);
+	is.open(file, ios::binary);
 	CHECK_EQUAL(false, is.fail());
 
 	// get length of file:
@@ -254,9 +315,18 @@ TEST(Parse_testProgFile) {
 	// read data as a block:
 	is.read(buffer, length);
 	is.close();
+	
+	return (const uint8 *)buffer;
+}
 
-	checkRoundTrip((const uint8 *)buffer, length);
-
+TEST(Parse_testProgFiles) {
+	int length;
+	const uint8 *buffer;
+	buffer = readFile("test1.xsvf", length);
+	checkRoundTrip(buffer, length);
+	delete[] buffer;
+	buffer = readFile("test2.xsvf", length);
+	checkRoundTrip(buffer, length);
 	delete[] buffer;
 }
 

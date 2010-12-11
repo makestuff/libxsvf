@@ -24,7 +24,8 @@ LIB = ../lib/linux/libxsvf.a
 CPP_SRCS = $(shell ls *.cpp)
 CPP_OBJS = $(CPP_SRCS:%.cpp=$(OBJDIR)/%.o)
 CPP = g++
-CPPFLAGS = -O3 -Wall -Wextra -Wundef -std=c++98 -pedantic-errors -I$(UTPP_HOME)/src -I../../../include
+CPPFLAGS = -O3 -Wall -Wextra -Wundef -std=c++98 -pedantic-errors -I$(UTPP_HOME)/src -I../../../include -DMAX_LEN=1024
+#CPPFLAGS = -g -Wall -Wextra -Wundef -std=c++98 -pedantic-errors -I$(UTPP_HOME)/src -I../../../include -DMAX_LEN=1024
 LDFLAGS =
 OBJDIR = .build
 DEPDIR = .deps

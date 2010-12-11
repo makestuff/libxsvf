@@ -23,7 +23,9 @@
 extern "C" {
 #endif
 
-	#define MAX_LEN 32
+	#ifndef MAX_LEN
+		#define MAX_LEN 32
+	#endif
 	//#define PARSE_HAVE_CALLBACKS
 	#define bitsToBytes(x) ((x>>3) + (x&7 ? 1 : 0))
 
@@ -33,6 +35,8 @@ extern "C" {
 		PARSE_ILLEGAL_XSIR,
 		PARSE_ILLEGAL_XSDRSIZE,
 		PARSE_MISSING_XSDRSIZE,
+		PARSE_ILLEGAL_XENDIR,
+		PARSE_ILLEGAL_XENDDR,
 		PARSE_CALLBACK_ERROR
 	} ParseStatus;
 	
@@ -95,7 +99,12 @@ extern "C" {
 			ParseStatus (*gotXREPEAT)(uint8);
 			ParseStatus (*gotXSDRSIZE)(uint16);
 			ParseStatus (*gotXSDRTDO)(uint16, const uint8 *, const uint8 *);
+			ParseStatus (*gotXSDRB)(uint16, const uint8 *);
+			ParseStatus (*gotXSDRC)(uint16, const uint8 *);
+			ParseStatus (*gotXSDRE)(uint16, const uint8 *);
 			ParseStatus (*gotXSTATE)(TAPState);
+			ParseStatus (*gotXENDIR)(uint8);
+			ParseStatus (*gotXENDDR)(uint8);
 		} ParseCallbacks;
 		ParseStatus parse(const uint8 *data, uint8 length, const ParseCallbacks *callbacks);
 	#else
@@ -106,7 +115,12 @@ extern "C" {
 		ParseStatus gotXREPEAT(uint8);
 		ParseStatus gotXSDRSIZE(uint16);
 		ParseStatus gotXSDRTDO(uint16, const uint8 *, const uint8 *);
+		ParseStatus gotXSDRB(uint16, const uint8 *);
+		ParseStatus gotXSDRC(uint16, const uint8 *);
+		ParseStatus gotXSDRE(uint16, const uint8 *);
 		ParseStatus gotXSTATE(TAPState);
+		ParseStatus gotXENDIR(uint8);
+		ParseStatus gotXENDDR(uint8);
 		ParseStatus parse(const uint8 *data, uint8 length);
 	#endif
 	void parseInit(void);
