@@ -50,8 +50,8 @@ ParseStatus parse(const uint8 *data, uint8 bufBytesRemaining
 					case XSIR:     // XSIR(uint8, ...)
 					case XREPEAT:  // XREPEAT(uint8)
 					case XSTATE:   // XSTATE(uint8)
-					case XENDIR:   // XENDIR(uint8)
-					case XENDDR:   // XENDDR(uint8)
+					case XENDIR:   // XENDIR(TAPState)
+					case XENDDR:   // XENDDR(TAPState)
 						break;
 					case XSDRTDO:  // XSDRTDO(..., ...)
 					case XTDOMASK: // XTDOMASK(...)

@@ -112,26 +112,31 @@ ParseStatus gotXSTATE(TAPState tapState) {
 		return PARSE_CALLBACK_ERROR;
 	}
 }
-ParseStatus gotXENDIR(uint8 endState) {
+ParseStatus gotXENDIR(TAPState endState) {
 	m_reconstruction.push_back(XENDIR);
 	m_reconstruction.push_back(endState);
 	return PARSE_SUCCESS;
 }
-ParseStatus gotXENDDR(uint8 endState) {
+ParseStatus gotXENDDR(TAPState endState) {
 	m_reconstruction.push_back(XENDDR);
 	m_reconstruction.push_back(endState);
 	return PARSE_SUCCESS;
 }
 #ifdef PARSE_HAVE_CALLBACKS
 const ParseCallbacks m_callbacks = {
-	gotXCOMPLETE,
 	gotXTDOMASK,
-	gotXSIR,
-	gotXRUNTEST,
 	gotXREPEAT,
+	gotXRUNTEST,
+	gotXSIR,
 	gotXSDRSIZE,
 	gotXSDRTDO,
-	gotXSTATE
+	gotXSDRB,
+	gotXSDRC,
+	gotXSDRE,
+	gotXCOMPLETE,
+	gotXSTATE,
+	gotXENDIR,
+	gotXENDDR
 };
 #endif
 

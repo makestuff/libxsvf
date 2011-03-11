@@ -92,35 +92,57 @@ extern "C" {
 
 	#ifdef PARSE_HAVE_CALLBACKS
 		typedef struct {
-			ParseStatus (*gotXCOMPLETE)(void);
+			// See XAPP503 page 18
 			ParseStatus (*gotXTDOMASK)(uint16, const uint8 *);
-			ParseStatus (*gotXSIR)(uint8, const uint8 *);
-			ParseStatus (*gotXRUNTEST)(uint32);
 			ParseStatus (*gotXREPEAT)(uint8);
+
+			// See XAPP503 page 19
+			ParseStatus (*gotXRUNTEST)(uint32);
+			ParseStatus (*gotXSIR)(uint8, const uint8 *);
 			ParseStatus (*gotXSDRSIZE)(uint16);
+
+			// See XAPP503 page 20
 			ParseStatus (*gotXSDRTDO)(uint16, const uint8 *, const uint8 *);
 			ParseStatus (*gotXSDRB)(uint16, const uint8 *);
 			ParseStatus (*gotXSDRC)(uint16, const uint8 *);
 			ParseStatus (*gotXSDRE)(uint16, const uint8 *);
+
+			// See XAPP503 page 22
+			ParseStatus (*gotXCOMPLETE)(void);
 			ParseStatus (*gotXSTATE)(TAPState);
-			ParseStatus (*gotXENDIR)(uint8);
-			ParseStatus (*gotXENDDR)(uint8);
+			ParseStatus (*gotXENDIR)(TAPState);
+
+			// See XAPP503 page 23
+			ParseStatus (*gotXENDDR)(TAPState);
 		} ParseCallbacks;
+
+		// Parse using the specified callbacks
 		ParseStatus parse(const uint8 *data, uint8 length, const ParseCallbacks *callbacks);
 	#else
-		ParseStatus gotXCOMPLETE(void);
+		// See XAPP503 page 18
 		ParseStatus gotXTDOMASK(uint16, const uint8 *);
-		ParseStatus gotXSIR(uint8, const uint8 *);
-		ParseStatus gotXRUNTEST(uint32);
 		ParseStatus gotXREPEAT(uint8);
+
+		// See XAPP503 page 19
+		ParseStatus gotXRUNTEST(uint32);
+		ParseStatus gotXSIR(uint8, const uint8 *);
 		ParseStatus gotXSDRSIZE(uint16);
+
+		// See XAPP503 page 20
 		ParseStatus gotXSDRTDO(uint16, const uint8 *, const uint8 *);
 		ParseStatus gotXSDRB(uint16, const uint8 *);
 		ParseStatus gotXSDRC(uint16, const uint8 *);
 		ParseStatus gotXSDRE(uint16, const uint8 *);
+
+		// See XAPP503 page 22
+		ParseStatus gotXCOMPLETE(void);
 		ParseStatus gotXSTATE(TAPState);
-		ParseStatus gotXENDIR(uint8);
-		ParseStatus gotXENDDR(uint8);
+		ParseStatus gotXENDIR(TAPState);
+
+		// See XAPP503 page 23
+		ParseStatus gotXENDDR(TAPState);
+
+		// Parse using just one global set of callbacks
 		ParseStatus parse(const uint8 *data, uint8 length);
 	#endif
 	void parseInit(void);
