@@ -112,14 +112,14 @@ ParseStatus gotXSTATE(TAPState tapState) {
 		return PARSE_CALLBACK_ERROR;
 	}
 }
-ParseStatus gotXENDIR(TAPState endState) {
+ParseStatus gotXENDIR(uint8 endIR) {
 	m_reconstruction.push_back(XENDIR);
-	m_reconstruction.push_back(endState);
+	m_reconstruction.push_back(endIR);
 	return PARSE_SUCCESS;
 }
-ParseStatus gotXENDDR(TAPState endState) {
+ParseStatus gotXENDDR(uint8 endDR) {
 	m_reconstruction.push_back(XENDDR);
-	m_reconstruction.push_back(endState);
+	m_reconstruction.push_back(endDR);
 	return PARSE_SUCCESS;
 }
 #ifdef PARSE_HAVE_CALLBACKS

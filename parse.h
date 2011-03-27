@@ -110,10 +110,10 @@ extern "C" {
 			// See XAPP503 page 22
 			ParseStatus (*gotXCOMPLETE)(void);
 			ParseStatus (*gotXSTATE)(TAPState);
-			ParseStatus (*gotXENDIR)(TAPState);
+			ParseStatus (*gotXENDIR)(uint8);
 
 			// See XAPP503 page 23
-			ParseStatus (*gotXENDDR)(TAPState);
+			ParseStatus (*gotXENDDR)(uint8);
 		} ParseCallbacks;
 
 		// Parse using the specified callbacks
@@ -137,10 +137,10 @@ extern "C" {
 		// See XAPP503 page 22
 		ParseStatus gotXCOMPLETE(void);
 		ParseStatus gotXSTATE(TAPState);
-		ParseStatus gotXENDIR(TAPState);
+		ParseStatus gotXENDIR(uint8);
 
 		// See XAPP503 page 23
-		ParseStatus gotXENDDR(TAPState);
+		ParseStatus gotXENDDR(uint8);
 
 		// Parse using just one global set of callbacks
 		ParseStatus parse(const uint8 *data, uint8 length);
